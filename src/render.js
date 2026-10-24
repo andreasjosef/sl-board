@@ -78,6 +78,10 @@ export function renderRows(listEl, rows) {
 
 // ---------- Step 4 – reduce (the numbers are computed in main.js) ----------
 
+function nextToHtml(row) {
+  return `<span class="chip" data-color="${lineColor(row)}">${escapeHtml(row.line)} <strong>${escapeHtml(row.display)}</strong></span>`;
+}
+
 export function renderSummary(el, summary) {
   const modeChips = Object.keys(summary.counts).map(
     (mode) => `<span class="chip">${MODE_LABEL[mode]} <strong>${summary.counts[mode]}</strong></span>`,
@@ -96,7 +100,10 @@ export function renderSummary(el, summary) {
   el.innerHTML = `
     ${modeChips.join("")}
     <span class="${cancelledClass}">Inställda <strong>${summary.cancelled}</strong></span>
-    <span class="chip">Tunnelbana inom 5 min <strong>${metroSoon}</strong></span>`;
+    <span class="chip">Tunnelbana inom 5 min <strong>${metroSoon}</strong></span>
+    <div class="next-per-line" aria-label="Nästa avgång per linje">
+      ${Object.values(summary.next).map(nextToHtml).join("")}
+    </div>`;
 }
 
 function deviationToHtml(deviation) {

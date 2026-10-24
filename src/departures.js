@@ -105,4 +105,17 @@ export function hasModeWithin(rows, mode, maxMinutes) {
 }
 
 // ---------- Breakout ----------
-// TODO: nextPerLine(rows) – the next departure for every line
+// The next departure for every line: { "17": row, "13": row, … }
+// Sorted first, so the first row we meet for a line is the earliest one.
+
+export function nextPerLine(rows) {
+  return rows
+    .filter(notCancelled)
+    .toSorted(byTime)
+    .reduce((next, row) => {
+      if (next[row.line] === undefined) {
+        next[row.line] = row;
+      }
+      return next;
+    }, {});
+}

@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l1-4-reduce`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l1-5-done`** (samma som `l2-0-start`)****. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -194,17 +194,45 @@ export function countByMode(rows) {
 
 **Prova:** Sammanfattningen visar antal per trafikslag, antal inställda och "Tunnelbana inom 5 min".
 
+### Pass 1, klart – Nästa avgång per linje · `l1-5-done`
+
+**Vad vi gör:** Breakout-lösningen. `nextPerLine` kedjar ihop allt från pass 1:
+
+```js
+export function nextPerLine(rows) {
+  return rows
+    .filter(notCancelled)
+    .toSorted(byTime)
+    .reduce((next, row) => {
+      if (next[row.line] === undefined) {
+        next[row.line] = row;
+      }
+      return next;
+    }, {});
+}
+```
+
+**Varför:**
+- `filter` tar bort det vi inte vill ha, `toSorted` ställer resten i rätt ordning, och `reduce` gör listan till ett objekt med en avgång per linje.
+- Ordningen spelar roll. Eftersom vi sorterar först är den första raden vi möter för en linje också den tidigaste, så `reduce` behöver bara behålla den första.
+
+**Prova:** Under sammanfattningen visas en chip per linje med nästa avgång.
+
+**Extrauppgifter** (lös dem i `src/departures.js` och prova i konsolen):
+1. `nextMetro(rows)` – den första tunnelbanan som inte är inställd. Vilken metod ger *en* rad tillbaka?
+2. `byLine(line)` – ett filter för en linje, byggt som `byMode`. Hur många rader har linje 17?
+3. `maxDelay(rows)` – den största förseningen i minuter, med `reduce`.
+
+> Pass 2 börjar på `l2-0-start`, som är exakt samma kod som den här branchen.
+
 ### Nästa steg
 
-**Breakout – nästa avgång per linje.** Det står ett `TODO` längst ner i `src/departures.js`.
+**Pass 2, steg 1 – Uppdatera-knappen.** Tryck på Uppdatera. Hände något? Tavlan är *frusen*: knappen säger ingenting. Bra feedback svarar på tre frågor:
 
-Skriv `nextPerLine(rows)`. Den ska returnera ett objekt med den första avgången för varje linje: `{ "17": row, "13": row, … }`.
+1. **Hörde du mig?** Knappen reagerar direkt när du trycker.
+2. **Jobbar du?** Något syns medan datan hämtas.
+3. **Hur gick det?** Klart eller fel, så att man ser det.
 
-Ledtrådar:
-1. Inställda turer går inte, så ta bort dem först.
-2. Sortera på tid. Då är den första raden du hittar för en linje också den tidigaste.
-3. `reduce` med `{}` som start: lägg bara till raden om linjen inte redan finns (`next[row.line] === undefined`).
+Vi ger knappen fyra lägen i `data-state`: `idle`, `loading`, `success` och `error`. JavaScript sätter läget, och CSS bestämmer hur varje läge ser ut.
 
-Använd den i `render()` i `main.js` och visa resultatet i `renderSummary`.
-
-Klar eller fast? `git switch l1-5-done`
+Klar eller fast? `git switch l2-1-button`

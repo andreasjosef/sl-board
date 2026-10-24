@@ -1,5 +1,12 @@
 import { fetchBoard } from "./api.js";
-import { toRow, visibleRows, countByMode, countCancelled, hasModeWithin } from "./departures.js";
+import {
+  toRow,
+  visibleRows,
+  countByMode,
+  countCancelled,
+  hasModeWithin,
+  nextPerLine,
+} from "./departures.js";
 import { renderMeta, renderRows, renderSummary, renderDeviations } from "./render.js";
 
 // Which data to show: ?source=live | snapshot | broken
@@ -36,6 +43,7 @@ function render() {
     counts: countByMode(state.rows),
     cancelled: countCancelled(state.rows),
     metroSoon: hasModeWithin(state.rows, "METRO", 5),
+    next: nextPerLine(state.rows),
   });
   renderRows(el.rows, visible);
   el.status.textContent = `Visar ${visible.length} av ${state.rows.length} avgångar.`;

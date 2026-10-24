@@ -169,6 +169,17 @@ body {
   width: 100%;
 }
 
+.next-per-line .chip {
+  border-left: 4px solid var(--other);
+}
+
+.chip[data-color="green"] { border-left-color: var(--green); }
+.chip[data-color="red"] { border-left-color: var(--red); }
+.chip[data-color="blue"] { border-left-color: var(--blue); }
+.chip[data-color="train"] { border-left-color: var(--train); }
+.chip[data-color="tram"] { border-left-color: var(--tram); }
+.chip[data-color="bus"] { border-left-color: var(--bus); }
+
 /* ---------- Deviations ---------- */
 
 .deviations:empty {
