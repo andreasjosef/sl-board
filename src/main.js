@@ -1,6 +1,6 @@
 import { fetchBoard } from "./api.js";
-import { toRow, visibleRows } from "./departures.js";
-import { renderMeta, renderRows, renderDeviations } from "./render.js";
+import { toRow, visibleRows, countByMode, countCancelled, hasModeWithin } from "./departures.js";
+import { renderMeta, renderRows, renderSummary, renderDeviations } from "./render.js";
 
 // Which data to show: ?source=live | snapshot | broken
 const params = new URLSearchParams(location.search);
@@ -10,6 +10,7 @@ const el = {
   meta: document.querySelector("#meta"),
   refresh: document.querySelector("#refresh"),
   filters: document.querySelector("#filters"),
+  summary: document.querySelector("#summary"),
   rows: document.querySelector("#rows"),
   deviations: document.querySelector("#deviations"),
   status: document.querySelector("#status"),
@@ -31,6 +32,11 @@ function readFilters() {
 function render() {
   const visible = visibleRows(state.rows, readFilters());
 
+  renderSummary(el.summary, {
+    counts: countByMode(state.rows),
+    cancelled: countCancelled(state.rows),
+    metroSoon: hasModeWithin(state.rows, "METRO", 5),
+  });
   renderRows(el.rows, visible);
   el.status.textContent = `Visar ${visible.length} av ${state.rows.length} avgångar.`;
 }

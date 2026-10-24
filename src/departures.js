@@ -76,7 +76,33 @@ export function visibleRows(rows, filters) {
 }
 
 // ---------- Step 4 – reduce ----------
-// TODO: countByMode(rows), countCancelled(rows)
+// reduce boils a whole array down to one value. That value can be a number…
+
+export function countCancelled(rows) {
+  return rows.reduce((count, row) => {
+    if (row.cancelled) {
+      return count + 1;
+    }
+    return count;
+  }, 0);
+}
+
+// …or an object: { METRO: 60, BUS: 16, … }
+// The object is brand new (the {} at the end), so it's fine to add to it.
+export function countByMode(rows) {
+  return rows.reduce((counts, row) => {
+    if (counts[row.mode] === undefined) {
+      counts[row.mode] = 0;
+    }
+    counts[row.mode] = counts[row.mode] + 1;
+    return counts;
+  }, {});
+}
+
+// some: is there at least one? Stops looking as soon as it finds one.
+export function hasModeWithin(rows, mode, maxMinutes) {
+  return rows.some((row) => row.mode === mode && !row.cancelled && row.minutes <= maxMinutes);
+}
 
 // ---------- Breakout ----------
 // TODO: nextPerLine(rows) – the next departure for every line

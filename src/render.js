@@ -76,6 +76,29 @@ export function renderRows(listEl, rows) {
   }
 }
 
+// ---------- Step 4 – reduce (the numbers are computed in main.js) ----------
+
+export function renderSummary(el, summary) {
+  const modeChips = Object.keys(summary.counts).map(
+    (mode) => `<span class="chip">${MODE_LABEL[mode]} <strong>${summary.counts[mode]}</strong></span>`,
+  );
+
+  let cancelledClass = "chip";
+  if (summary.cancelled > 0) {
+    cancelledClass = "chip chip--warn";
+  }
+
+  let metroSoon = "Nej";
+  if (summary.metroSoon) {
+    metroSoon = "Ja";
+  }
+
+  el.innerHTML = `
+    ${modeChips.join("")}
+    <span class="${cancelledClass}">Inställda <strong>${summary.cancelled}</strong></span>
+    <span class="chip">Tunnelbana inom 5 min <strong>${metroSoon}</strong></span>`;
+}
+
 function deviationToHtml(deviation) {
   let className = "deviation";
   if (deviation.importance_level >= 7) {

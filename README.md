@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l1-3-chain`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l1-4-reduce`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -170,12 +170,41 @@ export function byMode(mode) {
 
 **Prova:** Raderna står nu i tidsordning, även när du byter filter.
 
+### Pass 1, steg 4 – `reduce` och `some`: räkna ihop · `l1-4-reduce`
+
+**Vad vi gör:** Tre nya funktioner i `src/departures.js`, och `renderSummary` i `src/render.js` som visar resultatet som chips:
+
+```js
+export function countByMode(rows) {
+  return rows.reduce((counts, row) => {
+    if (counts[row.mode] === undefined) {
+      counts[row.mode] = 0;
+    }
+    counts[row.mode] = counts[row.mode] + 1;
+    return counts;
+  }, {});
+}
+```
+
+**Varför:**
+- `reduce` kokar ner en hel array till *ett* värde. Värdet kan vara ett tal (`countCancelled`, start `0`) eller ett objekt (`countByMode`, start `{}`).
+- Det du `return`ar blir `counts` i nästa varv. Glömmer du `return` blir det `undefined`.
+- Objektet `{}` skapas nytt varje gång funktionen körs, så det är okej att lägga till i det.
+- `some` svarar på "finns det minst en?" och slutar leta så fort den hittar en.
+
+**Prova:** Sammanfattningen visar antal per trafikslag, antal inställda och "Tunnelbana inom 5 min".
+
 ### Nästa steg
 
-**Steg 4 – `reduce` och `some`.** Fyll sammanfattningen ovanför tavlan.
+**Breakout – nästa avgång per linje.** Det står ett `TODO` längst ner i `src/departures.js`.
 
-- I `src/departures.js`: skriv `countCancelled(rows)`, som räknar till *ett tal*, och `countByMode(rows)`, som räknar till *ett objekt*: `{ METRO: 60, BUS: 16, … }`.
-- Skriv `hasModeWithin(rows, mode, maxMinutes)` med `some`: går det någon tunnelbana inom 5 minuter?
-- I `src/render.js`: `renderSummary` ritar siffrorna som chips.
+Skriv `nextPerLine(rows)`. Den ska returnera ett objekt med den första avgången för varje linje: `{ "17": row, "13": row, … }`.
 
-Klar eller fast? `git switch l1-4-reduce`
+Ledtrådar:
+1. Inställda turer går inte, så ta bort dem först.
+2. Sortera på tid. Då är den första raden du hittar för en linje också den tidigaste.
+3. `reduce` med `{}` som start: lägg bara till raden om linjen inte redan finns (`next[row.line] === undefined`).
+
+Använd den i `render()` i `main.js` och visa resultatet i `renderSummary`.
+
+Klar eller fast? `git switch l1-5-done`
