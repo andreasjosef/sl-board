@@ -7,8 +7,8 @@ import {
   hasModeWithin,
   nextPerLine,
 } from "./departures.js";
-import { renderMeta, renderRows, renderSummary, renderDeviations } from "./render.js";
-import { wait, announce } from "./feedback.js";
+import { renderMeta, renderRows, renderSummary, renderDeviations, formatTime } from "./render.js";
+import { wait, announce, shake } from "./feedback.js";
 
 // Which data to show: ?source=live | snapshot | broken
 // Pretend the network is slow: ?latency=1500 (milliseconds)
@@ -17,6 +17,7 @@ const source = params.get("source") || "snapshot";
 const latency = Number(params.get("latency") || 0);
 
 const el = {
+  board: document.querySelector("#board"),
   meta: document.querySelector("#meta"),
   refresh: document.querySelector("#refresh"),
   refreshLabel: document.querySelector(".refresh__label"),
@@ -32,6 +33,7 @@ const el = {
 const state = {
   rows: [],
   deviations: [],
+  now: null,
 };
 
 // ---------- Lesson 2, step 1 – the refresh button has four states ----------
@@ -96,6 +98,22 @@ function showDeviations(deviations) {
   }
 }
 
+// ---------- Lesson 2, step 5 – when it goes wrong ----------
+// Be honest: say what failed, keep showing what we have, and grey it out.
+
+function showError(error) {
+  setRefreshState("error");
+  shake(el.refresh);
+  el.board.dataset.state = "stale";
+
+  // #status has aria-live, so screen readers hear this too.
+  if (state.rows.length > 0) {
+    el.status.textContent = `Kunde inte uppdatera (${error.message}). Visar avgångar från ${formatTime(state.now)}.`;
+  } else {
+    el.status.textContent = `Kunde inte hämta avgångar (${error.message}).`;
+  }
+}
+
 async function load() {
   setRefreshState("loading");
 
@@ -106,14 +124,15 @@ async function load() {
 
     const oldRows = state.rows;
     state.rows = board.departures.map((departure) => toRow(departure, board.now));
+    state.now = board.now;
 
     renderMeta(el.meta, board.now, source);
     showDeviations(board.deviations);
     render(oldRows);
+    el.board.dataset.state = "fresh";
     setRefreshState("success");
   } catch (error) {
-    el.status.textContent = `Kunde inte hämta avgångar: ${error.message}`;
-    setRefreshState("error");
+    showError(error);
   }
 }
 

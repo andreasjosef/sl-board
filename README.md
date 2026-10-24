@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l2-4-deviations`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l2-5-error`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -292,10 +292,32 @@ Nya störningar får `data-new` och glider in (`slide-in` i `styles.css`). Deras
 
 **Prova:** Ladda om sidan, så glider störningarna in. Starta en skärmläsare (VoiceOver: Cmd+F5, Windows: Narrator med Ctrl+Win+Enter) och lyssna.
 
+### Pass 2, steg 5 – Fel: skak, grå tavla, ärligt meddelande · `l2-5-error`
+
+**Vad vi gör:** `showError(error)` i `src/main.js`:
+- sätter knappen i `error`,
+- skakar knappen med `shake()` från `src/feedback.js`,
+- sätter `data-state="stale"` på tavlan, så att den blir grå och blekare (`styles.css`),
+- skriver i statusraden vad som gick fel och hur gammal datan är: till exempel *"Kunde inte uppdatera (Failed to fetch). Visar avgångar från 08:12."*
+
+När en hämtning lyckas sätts `data-state="fresh"` igen.
+
+**Varför:**
+- **Visa det du har, och säg hur gammalt det är.** En tom tavla med "Något gick fel" kastar bort data som fortfarande är användbar. En gammal tavla som ser färsk ut är värre: den ljuger.
+- `shake` använder `element.animate()`, som kör keyframes från JavaScript. En CSS-animation startar inte om när attributet redan har samma värde, men `animate()` kan köras hur många gånger som helst. `shake` kollar själv `prefers-reduced-motion`.
+- Statusraden har `aria-live`, så felet läses upp också.
+
+**Prova:**
+- Fel *med* data på skärmen: ladda `/`, öppna DevTools → Network, välj **Offline** och tryck Uppdatera.
+- Fel *utan* data: `?source=broken`, där den allra första hämtningen misslyckas.
+
 ### Nästa steg
 
-**Pass 2, steg 5 – Ärligt fel.** Vad händer när nätet går ner? Just nu blir knappen röd en stund, och sedan ser den gamla tavlan ut som om allt är som vanligt.
+**Breakout – rader som glider när filtret ändras.** Klicka på ett filter. Raderna hoppar till sina nya platser direkt, så det är svårt att se vad som hände.
 
-Ett ärligt fel gör tre saker: säger *nej* (knappen skakar), visar *att datan är gammal* (tavlan blir grå) och berättar *vad som hände och hur gammal datan är* ("Visar avgångar från 08:00").
+Använd **View Transitions**:
+1. I `src/feedback.js`: skriv `withViewTransition(update)`. Finns `document.startViewTransition`, anropa den med `update`. Annars, eller om användaren vill ha mindre rörelse, anropa bara `update()`.
+2. I `src/render.js`: ge varje rad ett eget namn, `view-transition-name: row-${row.id}`, så att webbläsaren kan följa raden.
+3. I `src/main.js`: när filtret ändras, kör `withViewTransition(() => render(state.rows))`. Varför `state.rows` som gamla rader? Fundera på vad som annars skulle hända med `data-new`.
 
-Klar eller fast? `git switch l2-5-error`
+Klar eller fast? `git switch l2-6-done`

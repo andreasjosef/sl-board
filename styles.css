@@ -484,6 +484,22 @@ body {
   }
 }
 
+/* ---------- Step 5 – stale board after an error ---------- */
+/* The data is still there, but it clearly isn't fresh. */
+
+.summary,
+.departures {
+  transition:
+    opacity 300ms ease,
+    filter 300ms ease;
+}
+
+.board[data-state="stale"] .summary,
+.board[data-state="stale"] .departures {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+
 /* ---------- Respect people who don't want motion ---------- */
 /* The feedback is still there (color, text) – just without movement. */
 
