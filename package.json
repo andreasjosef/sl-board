@@ -1,0 +1,10 @@
+{
+  "name": "sl-board",
+  "private": true,
+  "type": "module",
+  "description": "SL departure board – starter for the lessons on higher-order functions and animations for feedback",
+  "scripts": {
+    "start": "npx --yes serve .",
+    "snapshot": "node scripts/fetch-snapshot.js"
+  }
+}

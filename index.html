@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Avgångar – T-Centralen</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="board" id="board" data-state="idle">
+      <header class="board__header">
+        <div>
+          <h1 class="board__title">T-Centralen</h1>
+          <p class="board__meta" id="meta"></p>
+        </div>
+        <button class="refresh" id="refresh" type="button" data-state="idle">
+          <span class="refresh__icon" aria-hidden="true"></span>
+          <span class="refresh__label">Uppdatera</span>
+        </button>
+      </header>
+
+      <form class="filters" id="filters" aria-label="Filtrera avgångar">
+        <fieldset class="filters__modes">
+          <legend class="visually-hidden">Trafikslag</legend>
+          <label><input type="radio" name="mode" value="ALL" checked /> Alla</label>
+          <label><input type="radio" name="mode" value="METRO" /> Tunnelbana</label>
+          <label><input type="radio" name="mode" value="TRAIN" /> Pendeltåg</label>
+          <label><input type="radio" name="mode" value="TRAM" /> Spårväg</label>
+          <label><input type="radio" name="mode" value="BUS" /> Buss</label>
+        </fieldset>
+        <fieldset class="filters__toggles">
+          <legend class="visually-hidden">Visa</legend>
+          <label><input type="checkbox" name="soon" /> Inom 10 min</label>
+          <label><input type="checkbox" name="hideCancelled" /> Dölj inställda</label>
+        </fieldset>
+      </form>
+
+      <section class="summary" id="summary" aria-label="Sammanfattning"></section>
+
+      <section class="deviations" id="deviations" aria-label="Störningar" aria-live="polite"></section>
+
+      <div class="departures">
+        <div class="row row--head" aria-hidden="true">
+          <span>Linje</span>
+          <span>Destination</span>
+          <span>Avgår</span>
+          <span>Status</span>
+        </div>
+        <ol class="rows" id="rows" aria-label="Avgångar"></ol>
+      </div>
+
+      <p class="status-line" id="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
