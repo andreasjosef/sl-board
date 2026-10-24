@@ -401,6 +401,68 @@ body {
   }
 }
 
+/* ---------- Step 3 – status: now, delayed, cancelled ---------- */
+/* Only animate when something is new or changed. Then stop. */
+
+.row__status {
+  justify-self: start;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* "Nu" pulses a few times – then stays bright. */
+.row[data-status="now"] .row__time {
+  color: var(--text);
+}
+
+.row[data-status="now"][data-new] .row__time,
+.row[data-status="now"][data-changed] .row__time {
+  animation: pulse 1s ease-in-out 3;
+  animation-delay: calc(var(--i, 0) * 35ms + 400ms);
+}
+
+/* A delay flashes yellow once. */
+.row[data-status="delayed"][data-new] .row__status,
+.row[data-status="delayed"][data-changed] .row__status {
+  animation: flash 900ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 35ms + 400ms);
+}
+
+/* A cancellation gets crossed out – you see it happen. */
+.row[data-status="cancelled"] .row__destination {
+  justify-self: start;
+  text-decoration: none;
+  background: linear-gradient(var(--danger), var(--danger)) no-repeat 0 55% / 100% 2px;
+}
+
+.row[data-status="cancelled"][data-new] .row__destination,
+.row[data-status="cancelled"][data-changed] .row__destination {
+  animation: strike 500ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 35ms + 400ms);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  30% {
+    background-color: rgb(255 210 63 / 0.35);
+  }
+}
+
+@keyframes strike {
+  from {
+    background-size: 0% 2px;
+  }
+}
+
 /* ---------- Respect people who don't want motion ---------- */
 /* The feedback is still there (color, text) – just without movement. */
 

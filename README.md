@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l2-2-rows`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l2-3-status`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -257,10 +257,25 @@ Varje rad får också `--i`, sin plats i listan. I `styles.css` vänds `.row[dat
 
 **Prova:** Ladda om sidan, så vänds hela tavlan in (allt är nytt). Tryck sedan Uppdatera. Med sparad data kommer inget nytt, så inget rör sig, och det är meningen. Med `?source=live` kommer det nya avgångar efter en stund.
 
+### Pass 2, steg 3 – "Nu" pulserar, försening blinkar, inställd stryks · `l2-3-status`
+
+**Vad vi gör:** `changeOf` i `src/render.js` har fått en rad till: om radens status (`now`, `delayed`, `cancelled` eller `ok`) inte är samma som förra gången får den `data-changed`. I `styles.css`:
+- "Nu" pulserar 3 gånger (`pulse`, inte `infinite`).
+- En försening blinkar gult en gång (`flash`).
+- En inställd tur stryks över med ett streck som ritas från vänster (`strike`, en `background` som växer från 0 % till 100 %).
+
+Alla tre körs bara på `[data-new]` eller `[data-changed]`, och de väntar tills raden har vänt in klart (`+ 400ms`).
+
+**Varför:**
+- **Rörelse som aldrig slutar är brus.** Blinka en gång och sluta, så betyder blinket något.
+- Läget syns även när animationen är slut: "Nu" är ljust, förseningen har sin text, och den inställda turen har kvar strecket. Animationen visar *att något ändrades*, och utseendet efteråt visar *hur det är nu*.
+
+**Prova:** Ladda om sidan och titta på raderna som är "Nu", försenade eller inställda. Ändra `3` till `infinite` i `pulse`-regeln och se hur störande det blir.
+
 ### Nästa steg
 
-**Pass 2, steg 3 – En gång räcker.** Tre lägen ska synas: "Nu", försenad och inställd. Men något som rör sig hela tiden blir brus som ingen ser till slut.
+**Pass 2, steg 4 – Inte bara för ögonen.** En störning dyker upp på tavlan. Den som använder skärmläsare märker ingenting.
 
-Vi animerar bara när en rad är ny eller har *ändrats*. "Nu" pulserar tre gånger, en försening blinkar en gång, och en inställd tur stryks över medan du tittar. Sedan står de still.
+Nya störningar ska glida in, och de ska *läsas upp* med `aria-live`. Precis som med raderna tar vi reda på vilka störningar som är nya genom att jämföra `id` med förra hämtningen.
 
-Klar eller fast? `git switch l2-3-status`
+Klar eller fast? `git switch l2-4-deviations`

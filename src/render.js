@@ -59,9 +59,11 @@ function statusText(row) {
 }
 
 // Lesson 2, step 2: a row that wasn't there at the last fetch gets data-new.
+// Step 3: a row whose status changed (e.g. became delayed) gets data-changed.
 function changeOf(row, oldRows) {
   const oldRow = oldRows.find((old) => old.id === row.id);
   if (oldRow === undefined) return "data-new";
+  if (statusOf(oldRow) !== statusOf(row)) return "data-changed";
   return "";
 }
 
