@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l1-2-filter`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l1-3-chain`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -158,12 +158,24 @@ export function byMode(mode) {
 
 **Prova:** Klicka på Tunnelbana, Inom 10 min och Dölj inställda. Statusraden visar hur många av alla som syns.
 
+### Pass 1, steg 3 – Kedjan: `filter` → `toSorted` · `l1-3-chain`
+
+**Vad vi gör:** `visibleRows(rows, filters)` i `src/departures.js` kör de valda filtren efter varandra och sorterar till sist med `toSorted(byTime)`. `main.js` blir kortare: den läser formuläret och ritar, resten sker i `departures.js`.
+
+**Varför:**
+- Varje steg returnerar en *ny* array, så nästa steg kan fortsätta där det förra slutade.
+- `sort` ändrar arrayen den anropas på. Då skulle `state.rows` byta ordning för gott, och allt annat som läser `state.rows` skulle få den nya ordningen. `toSorted` gör en sorterad kopia och lämnar originalet orört.
+- `byTime(a, b)` returnerar `a.minutes - b.minutes`. Negativt tal: `a` först. Positivt: `b` först.
+- Funktionen tar data och returnerar data. Den rör inte sidan, så du kan testa den i konsolen.
+
+**Prova:** Raderna står nu i tidsordning, även när du byter filter.
+
 ### Nästa steg
 
-**Steg 3 – kedjan.** Flytta filtreringen från `main.js` till en egen funktion och sortera resultatet.
+**Steg 4 – `reduce` och `some`.** Fyll sammanfattningen ovanför tavlan.
 
-- I `src/departures.js`: skriv `byTime(a, b)` som jämför `minutes`, och `visibleRows(rows, filters)` som kör de valda filtren efter varandra och till sist `toSorted(byTime)`.
-- `render()` i `main.js` anropar bara `visibleRows(state.rows, readFilters())`.
-- Använd `toSorted`, inte `sort`. Fundera på varför innan du läser svaret.
+- I `src/departures.js`: skriv `countCancelled(rows)`, som räknar till *ett tal*, och `countByMode(rows)`, som räknar till *ett objekt*: `{ METRO: 60, BUS: 16, … }`.
+- Skriv `hasModeWithin(rows, mode, maxMinutes)` med `some`: går det någon tunnelbana inom 5 minuter?
+- I `src/render.js`: `renderSummary` ritar siffrorna som chips.
 
-Klar eller fast? `git switch l1-3-chain`
+Klar eller fast? `git switch l1-4-reduce`

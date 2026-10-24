@@ -1,5 +1,5 @@
 import { fetchBoard } from "./api.js";
-import { toRow, byMode, within, notCancelled } from "./departures.js";
+import { toRow, visibleRows } from "./departures.js";
 import { renderMeta, renderRows, renderDeviations } from "./render.js";
 
 // Which data to show: ?source=live | snapshot | broken
@@ -29,19 +29,7 @@ function readFilters() {
 }
 
 function render() {
-  const filters = readFilters();
-
-  // filter: every step gives a new, shorter (or equal) array
-  let visible = state.rows;
-  if (filters.mode !== "ALL") {
-    visible = visible.filter(byMode(filters.mode));
-  }
-  if (filters.soon) {
-    visible = visible.filter(within(10));
-  }
-  if (filters.hideCancelled) {
-    visible = visible.filter(notCancelled);
-  }
+  const visible = visibleRows(state.rows, readFilters());
 
   renderRows(el.rows, visible);
   el.status.textContent = `Visar ${visible.length} av ${state.rows.length} avgångar.`;

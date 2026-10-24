@@ -54,7 +54,26 @@ export function notCancelled(row) {
 }
 
 // ---------- Step 3 – chain ----------
-// TODO: visibleRows(rows, filters) – filter, filter, filter, toSorted
+// Each filter returns a new array, so the next step can carry on from there.
+// toSorted (not sort!) leaves the original array untouched.
+
+export function byTime(a, b) {
+  return a.minutes - b.minutes;
+}
+
+export function visibleRows(rows, filters) {
+  let visible = rows;
+  if (filters.mode !== "ALL") {
+    visible = visible.filter(byMode(filters.mode));
+  }
+  if (filters.soon) {
+    visible = visible.filter(within(10));
+  }
+  if (filters.hideCancelled) {
+    visible = visible.filter(notCancelled);
+  }
+  return visible.toSorted(byTime);
+}
 
 // ---------- Step 4 – reduce ----------
 // TODO: countByMode(rows), countCancelled(rows)
