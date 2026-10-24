@@ -500,6 +500,14 @@ body {
   filter: grayscale(1);
 }
 
+/* ---------- Step 6 – rows glide when the filter changes ---------- */
+/* Each row has a view-transition-name (set in render.js). */
+
+::view-transition-group(*) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 /* ---------- Respect people who don't want motion ---------- */
 /* The feedback is still there (color, text) – just without movement. */
 

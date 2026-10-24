@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l2-5-error`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l2-6-done`** (samma som `solution`). Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -311,13 +311,31 @@ När en hämtning lyckas sätts `data-state="fresh"` igen.
 - Fel *med* data på skärmen: ladda `/`, öppna DevTools → Network, välj **Offline** och tryck Uppdatera.
 - Fel *utan* data: `?source=broken`, där den allra första hämtningen misslyckas.
 
-### Nästa steg
+### Pass 2, klart – Rader glider när filtret ändras · `l2-6-done`
 
-**Breakout – rader som glider när filtret ändras.** Klicka på ett filter. Raderna hoppar till sina nya platser direkt, så det är svårt att se vad som hände.
+**Vad vi gör:** Breakout-lösningen. `withViewTransition(update)` i `src/feedback.js`:
 
-Använd **View Transitions**:
-1. I `src/feedback.js`: skriv `withViewTransition(update)`. Finns `document.startViewTransition`, anropa den med `update`. Annars, eller om användaren vill ha mindre rörelse, anropa bara `update()`.
-2. I `src/render.js`: ge varje rad ett eget namn, `view-transition-name: row-${row.id}`, så att webbläsaren kan följa raden.
-3. I `src/main.js`: när filtret ändras, kör `withViewTransition(() => render(state.rows))`. Varför `state.rows` som gamla rader? Fundera på vad som annars skulle hända med `data-new`.
+```js
+export function withViewTransition(update) {
+  if (document.startViewTransition === undefined || prefersReducedMotion()) {
+    update();
+  } else {
+    document.startViewTransition(update);
+  }
+}
+```
 
-Klar eller fast? `git switch l2-6-done`
+Varje rad har `view-transition-name: row-<id>` (`src/render.js`). När filtret ändras kör `main.js` `withViewTransition(() => render(state.rows))`. Webbläsaren tar en bild av sidan före och efter `update()` och låter varje rad glida från sin gamla plats till sin nya. `::view-transition-group(*)` i `styles.css` sätter tiden till 300 ms.
+
+**Varför:**
+- **Progressive enhancement.** Har webbläsaren inte stöd för View Transitions uppdateras tavlan ändå, bara utan animation. Appen fungerar i båda fallen.
+- Ett filter visar *samma* rader som förut, bara färre eller fler. Därför skickar vi `state.rows` som gamla rader: ingen rad räknas som ny, så ingen vänds in, och de glider i stället.
+
+**Prova:** Växla mellan Alla och Tunnelbana. Kryssa i och ur "Inom 10 min".
+
+**Extrauppgifter:**
+1. **Hitta buggen.** Gör ett fel (DevTools → Network → Offline, tryck Uppdatera) och byt sedan filter. Vad händer med felmeddelandet? Rätta det så att tavlan fortsätter säga att den visar gammal data.
+2. **Minska, ta inte bort.** Med `prefers-reduced-motion` försvinner flip-in helt, och då syns det inte längre vad som är nytt. Ge nya rader en kort tona-in (`opacity`) i stället för ingenting.
+3. **Tomt läge.** Med sparad data ger inget filter noll avgångar, så låt `visibleRows` returnera `[]` en stund. Hur ser tavlan ut då? Är meddelandet tydligt, och syns det att det är filtret och inte nätet?
+
+Det här är hela tavlan. `solution` pekar på samma kod.

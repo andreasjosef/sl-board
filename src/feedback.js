@@ -27,6 +27,17 @@ export function shake(el) {
   el.animate(keyframes, { duration: 400, easing: "ease-in-out" });
 }
 
+// Step 6 – View Transitions: the browser takes a picture of the page before and
+// after update(), and animates between them. No support (or reduced motion)?
+// Then we just update – the app works either way.
+export function withViewTransition(update) {
+  if (document.startViewTransition === undefined || prefersReducedMotion()) {
+    update();
+  } else {
+    document.startViewTransition(update);
+  }
+}
+
 // Step 4 – feedback that isn't only visual.
 // Screen readers read out text that appears in an aria-live element.
 // We empty it first and fill it a moment later, so the same message can be read out twice.

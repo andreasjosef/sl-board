@@ -69,10 +69,11 @@ function changeOf(row, oldRows) {
 
 // --i is the row's place in the list, so new rows can flip in one after another.
 // It stops at 15, so a new row far down the list doesn't wait for seconds.
+// Step 6: every row gets its own view-transition-name, so the browser can follow it.
 function rowToHtml(row, index, change) {
   return `
     <li class="row" data-id="${row.id}" data-color="${lineColor(row)}" data-status="${statusOf(row)}"
-        style="--i: ${Math.min(index, 15)}" ${change}>
+        style="--i: ${Math.min(index, 15)}; view-transition-name: row-${row.id}" ${change}>
       <span class="row__line">${escapeHtml(row.line)}</span>
       <span class="row__destination">${escapeHtml(row.destination)}</span>
       <span class="row__time">${escapeHtml(row.display)}</span>

@@ -8,7 +8,7 @@ import {
   nextPerLine,
 } from "./departures.js";
 import { renderMeta, renderRows, renderSummary, renderDeviations, formatTime } from "./render.js";
-import { wait, announce, shake } from "./feedback.js";
+import { wait, announce, shake, withViewTransition } from "./feedback.js";
 
 // Which data to show: ?source=live | snapshot | broken
 // Pretend the network is slow: ?latency=1500 (milliseconds)
@@ -137,6 +137,9 @@ async function load() {
 }
 
 // A new filter shows the same rows as before, so nothing is new.
-el.filters.addEventListener("change", () => render(state.rows));
+// Lesson 2, step 6: the rows glide into their new places.
+el.filters.addEventListener("change", () => {
+  withViewTransition(() => render(state.rows));
+});
 el.refresh.addEventListener("click", load);
 load();
