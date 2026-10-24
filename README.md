@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l2-1-button`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l2-2-rows`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -239,10 +239,28 @@ export function nextPerLine(rows) {
 - `?latency=1500` – ett långsamt nät, så du hinner se snurran.
 - `?source=broken` – hämtningen misslyckas och knappen blir röd.
 
+### Pass 2, steg 2 – Nya rader vänds in · `l2-2-rows`
+
+**Vad vi gör:** `load()` sparar de gamla raderna innan de nya ersätter dem och skickar med dem till `renderRows(listEl, rows, oldRows)`. I `src/render.js` tar `changeOf(row, oldRows)` reda på om raden är ny:
+
+```js
+const oldRow = oldRows.find((old) => old.id === row.id);
+if (oldRow === undefined) return "data-new";
+```
+
+Varje rad får också `--i`, sin plats i listan. I `styles.css` vänds `.row[data-new]` in med `flip-in`, och fördröjningen är `--i * 35ms`, så raderna kommer en i taget.
+
+**Varför:**
+- **Bara nya rader rör sig, så rörelsen betyder "det här är nytt".** Om allt rör sig varje gång betyder rörelsen ingenting.
+- Vad som är nytt räknas ut från *datan* (`find` på `id`), inte genom att läsa av sidan. Datan är sanningen, sidan är bara en bild av den.
+- `--i` stannar på 15, så en ny rad långt ner inte väntar i flera sekunder.
+
+**Prova:** Ladda om sidan, så vänds hela tavlan in (allt är nytt). Tryck sedan Uppdatera. Med sparad data kommer inget nytt, så inget rör sig, och det är meningen. Med `?source=live` kommer det nya avgångar efter en stund.
+
 ### Nästa steg
 
-**Pass 2, steg 2 – Vad är nytt?** När tavlan uppdateras ser alla rader likadana ut, så man ser inte vad som har kommit till.
+**Pass 2, steg 3 – En gång räcker.** Tre lägen ska synas: "Nu", försenad och inställd. Men något som rör sig hela tiden blir brus som ingen ser till slut.
 
-Vi låter *bara nya rader* vända in, som på en gammal fälltavla. För att veta vad som är nytt jämför vi med raderna från förra hämtningen: finns det redan en rad med samma `id`?
+Vi animerar bara när en rad är ny eller har *ändrats*. "Nu" pulserar tre gånger, en försening blinkar en gång, och en inställd tur stryks över medan du tittar. Sedan står de still.
 
-Klar eller fast? `git switch l2-2-rows`
+Klar eller fast? `git switch l2-3-status`

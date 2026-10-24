@@ -64,7 +64,8 @@ function readFilters() {
   };
 }
 
-function render() {
+// oldRows: the rows from the fetch before, so render.js can tell what's new.
+function render(oldRows) {
   const visible = visibleRows(state.rows, readFilters());
 
   renderSummary(el.summary, {
@@ -73,7 +74,7 @@ function render() {
     metroSoon: hasModeWithin(state.rows, "METRO", 5),
     next: nextPerLine(state.rows),
   });
-  renderRows(el.rows, visible);
+  renderRows(el.rows, visible, oldRows);
   el.status.textContent = `Visar ${visible.length} av ${state.rows.length} avgångar.`;
 }
 
@@ -85,11 +86,12 @@ async function load() {
     const board = await fetchBoard(source);
     window.board = board;
 
+    const oldRows = state.rows;
     state.rows = board.departures.map((departure) => toRow(departure, board.now));
 
     renderMeta(el.meta, board.now, source);
     renderDeviations(el.deviations, board.deviations);
-    render();
+    render(oldRows);
     setRefreshState("success");
   } catch (error) {
     el.status.textContent = `Kunde inte hämta avgångar: ${error.message}`;
@@ -97,6 +99,7 @@ async function load() {
   }
 }
 
-el.filters.addEventListener("change", render);
+// A new filter shows the same rows as before, so nothing is new.
+el.filters.addEventListener("change", () => render(state.rows));
 el.refresh.addEventListener("click", load);
 load();

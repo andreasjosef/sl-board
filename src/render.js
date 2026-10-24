@@ -58,9 +58,19 @@ function statusText(row) {
   return "";
 }
 
-function rowToHtml(row) {
+// Lesson 2, step 2: a row that wasn't there at the last fetch gets data-new.
+function changeOf(row, oldRows) {
+  const oldRow = oldRows.find((old) => old.id === row.id);
+  if (oldRow === undefined) return "data-new";
+  return "";
+}
+
+// --i is the row's place in the list, so new rows can flip in one after another.
+// It stops at 15, so a new row far down the list doesn't wait for seconds.
+function rowToHtml(row, index, change) {
   return `
-    <li class="row" data-id="${row.id}" data-color="${lineColor(row)}" data-status="${statusOf(row)}">
+    <li class="row" data-id="${row.id}" data-color="${lineColor(row)}" data-status="${statusOf(row)}"
+        style="--i: ${Math.min(index, 15)}" ${change}>
       <span class="row__line">${escapeHtml(row.line)}</span>
       <span class="row__destination">${escapeHtml(row.destination)}</span>
       <span class="row__time">${escapeHtml(row.display)}</span>
@@ -68,11 +78,13 @@ function rowToHtml(row) {
     </li>`;
 }
 
-export function renderRows(listEl, rows) {
+// oldRows: the rows from the fetch before, so we can tell what's new.
+export function renderRows(listEl, rows, oldRows) {
   if (rows.length === 0) {
     listEl.innerHTML = `<li class="empty">Inga avgångar att visa.</li>`;
   } else {
-    listEl.innerHTML = rows.map(rowToHtml).join("");
+    const html = rows.map((row, index) => rowToHtml(row, index, changeOf(row, oldRows)));
+    listEl.innerHTML = html.join("");
   }
 }
 
