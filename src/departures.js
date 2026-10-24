@@ -20,8 +20,22 @@ export function isCancelled(departure) {
 }
 
 // ---------- Step 1 – map ----------
-// TODO: toRow(departure, now) turns one raw departure into the row the board
-// needs: { id, line, mode, group, destination, display, minutes, delay, cancelled }
+// toRow turns one raw departure into one row for the board.
+// Usage: board.departures.map((departure) => toRow(departure, board.now))
+
+export function toRow(departure, now) {
+  return {
+    id: departure.journey.id,
+    line: departure.line.designation,
+    mode: departure.line.transport_mode,
+    group: departure.line.group_of_lines,
+    destination: departure.destination,
+    display: departure.display,
+    minutes: minutesUntil(departure, now),
+    delay: delayMinutes(departure),
+    cancelled: isCancelled(departure),
+  };
+}
 
 // ---------- Step 2 – filter ----------
 // TODO: byMode(mode), within(maxMinutes), notCancelled

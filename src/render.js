@@ -44,4 +44,46 @@ export function renderMeta(el, now, source) {
 }
 
 // ---------- Step 1 – map ----------
-// TODO: renderRows(listEl, rows) – map every row to an <li>, join, put in the list
+
+function statusOf(row) {
+  if (row.cancelled) return "cancelled";
+  if (row.minutes <= 0) return "now";
+  if (row.delay > 0) return "delayed";
+  return "ok";
+}
+
+function statusText(row) {
+  if (row.cancelled) return "Inställd";
+  if (row.delay > 0) return `+${row.delay} min`;
+  return "";
+}
+
+function rowToHtml(row) {
+  return `
+    <li class="row" data-id="${row.id}" data-color="${lineColor(row)}" data-status="${statusOf(row)}">
+      <span class="row__line">${escapeHtml(row.line)}</span>
+      <span class="row__destination">${escapeHtml(row.destination)}</span>
+      <span class="row__time">${escapeHtml(row.display)}</span>
+      <span class="row__status">${statusText(row)}</span>
+    </li>`;
+}
+
+export function renderRows(listEl, rows) {
+  if (rows.length === 0) {
+    listEl.innerHTML = `<li class="empty">Inga avgångar att visa.</li>`;
+  } else {
+    listEl.innerHTML = rows.map(rowToHtml).join("");
+  }
+}
+
+function deviationToHtml(deviation) {
+  let className = "deviation";
+  if (deviation.importance_level >= 7) {
+    className = "deviation deviation--high";
+  }
+  return `<p class="${className}">${escapeHtml(deviation.message)}</p>`;
+}
+
+export function renderDeviations(el, deviations) {
+  el.innerHTML = deviations.map(deviationToHtml).join("");
+}

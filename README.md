@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l1-0-start`** (samma som `main`)****. Kolla med `git branch --show-current`.
+Du är på branchen **`l1-1-map`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -124,12 +124,28 @@ board.deviations
 
 **Var i koden:** `src/main.js` lägger datan i `window.board` så att du når den i konsolen. I `src/departures.js` och `src/render.js` står det `TODO` där vi ska skriva kod.
 
+### Pass 1, steg 1 – `map`: avgångar blir rader · `l1-1-map`
+
+**Vad vi gör:** `toRow(departure, now)` i `src/departures.js` gör om en rå avgång till en platt rad. `renderRows` i `src/render.js` gör om varje rad till en `<li>`. I `src/main.js` blir alla avgångar rader:
+
+```js
+state.rows = board.departures.map((departure) => toRow(departure, board.now));
+```
+
+**Varför:**
+- `map` ger *lika många* saker tillbaka som du stoppar in. 104 avgångar blir 104 rader, och originalet är orört.
+- `toRow` är det enda stället som känner till SL:s format. Byter SL namn på ett fält rättar du det på ett ställe, och resten av appen märker inget.
+- Varför inte `board.departures.map(toRow)`? `map` skickar med tre saker till funktionen: elementet, indexet och hela arrayen. Då skulle `now` bli indexet (0, 1, 2 …). Med en arrow function bestämmer vi själva vad som skickas.
+
+**Prova:** Tavlan visar nu alla avgångar. Räkna: är det lika många rader som `board.departures.length`?
+
 ### Nästa steg
 
-**Steg 1 – `map`.** Gör om varje rå avgång till en rad som tavlan kan visa.
+**Steg 2 – `filter`.** Få filtren ovanför tavlan att fungera.
 
-- I `src/departures.js`: skriv `toRow(departure, now)`. Den tar *en* avgång och returnerar ett nytt objekt `{ id, line, mode, group, destination, display, minutes, delay, cancelled }`. Hjälpfunktionerna `minutesUntil`, `delayMinutes` och `isCancelled` finns redan.
-- I `src/render.js`: skriv `renderRows(listEl, rows)`. Gör om varje rad till en `<li>` med `map`, sätt ihop dem med `join("")` och lägg in dem i listan.
-- I `src/main.js`: `board.departures.map((departure) => toRow(departure, board.now))`.
+- I `src/departures.js`: skriv `byMode(mode)`, `within(maxMinutes)` och `notCancelled(row)`.
+- `byMode` och `within` ska *returnera en funktion*, så att du kan skriva `rows.filter(byMode("METRO"))`.
+- `notCancelled` är själva testet, så den skickas in utan att anropas: `rows.filter(notCancelled)`.
+- I `src/main.js`: läs av formuläret och filtrera bara när ett filter är valt.
 
-Klar eller fast? `git switch l1-1-map`
+Klar eller fast? `git switch l1-2-filter`
