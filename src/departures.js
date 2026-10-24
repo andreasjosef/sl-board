@@ -38,7 +38,20 @@ export function toRow(departure, now) {
 }
 
 // ---------- Step 2 – filter ----------
-// TODO: byMode(mode), within(maxMinutes), notCancelled
+// byMode and within are functions that *make* filter functions.
+// Usage: rows.filter(byMode("METRO"))
+
+export function byMode(mode) {
+  return (row) => row.mode === mode;
+}
+
+export function within(maxMinutes) {
+  return (row) => row.minutes <= maxMinutes;
+}
+
+export function notCancelled(row) {
+  return !row.cancelled;
+}
 
 // ---------- Step 3 – chain ----------
 // TODO: visibleRows(rows, filters) – filter, filter, filter, toSorted

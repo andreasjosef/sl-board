@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l1-1-map`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l1-2-filter`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -139,13 +139,31 @@ state.rows = board.departures.map((departure) => toRow(departure, board.now));
 
 **Prova:** Tavlan visar nu alla avgångar. Räkna: är det lika många rader som `board.departures.length`?
 
+### Pass 1, steg 2 – `filter`: välj vad som syns · `l1-2-filter`
+
+**Vad vi gör:** Tre filter i `src/departures.js`:
+
+```js
+export function byMode(mode) {
+  return (row) => row.mode === mode;
+}
+```
+
+`within(maxMinutes)` fungerar på samma sätt, och `notCancelled(row)` svarar `true` om turen går. `render()` i `src/main.js` läser formuläret och filtrerar bara när ett filter är valt.
+
+**Varför:**
+- `filter` ger *färre eller lika många* tillbaka, aldrig fler. Raderna själva ändras inte.
+- `byMode("METRO")` är en funktion som *gör* en funktion. Den nya funktionen minns `mode` (en closure), och det är precis en sådan funktion `filter` vill ha.
+- Fallgrop: `rows.filter(byMode)` utan anrop. Då får `filter` funktionen som gör funktioner, och varje svar blir en funktion. En funktion räknas som sant, så alla rader blir kvar.
+
+**Prova:** Klicka på Tunnelbana, Inom 10 min och Dölj inställda. Statusraden visar hur många av alla som syns.
+
 ### Nästa steg
 
-**Steg 2 – `filter`.** Få filtren ovanför tavlan att fungera.
+**Steg 3 – kedjan.** Flytta filtreringen från `main.js` till en egen funktion och sortera resultatet.
 
-- I `src/departures.js`: skriv `byMode(mode)`, `within(maxMinutes)` och `notCancelled(row)`.
-- `byMode` och `within` ska *returnera en funktion*, så att du kan skriva `rows.filter(byMode("METRO"))`.
-- `notCancelled` är själva testet, så den skickas in utan att anropas: `rows.filter(notCancelled)`.
-- I `src/main.js`: läs av formuläret och filtrera bara när ett filter är valt.
+- I `src/departures.js`: skriv `byTime(a, b)` som jämför `minutes`, och `visibleRows(rows, filters)` som kör de valda filtren efter varandra och till sist `toSorted(byTime)`.
+- `render()` i `main.js` anropar bara `visibleRows(state.rows, readFilters())`.
+- Använd `toSorted`, inte `sort`. Fundera på varför innan du läser svaret.
 
-Klar eller fast? `git switch l1-2-filter`
+Klar eller fast? `git switch l1-3-chain`
