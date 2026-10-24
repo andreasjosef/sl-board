@@ -306,3 +306,86 @@ body {
     display: none;
   }
 }
+
+/* ============================================================
+   Lesson 2 – feedback
+   ============================================================ */
+
+/* ---------- Step 1 – the refresh button ---------- */
+
+.refresh {
+  transition:
+    transform 120ms ease-out,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+
+.refresh:hover {
+  background: #1f2c4a;
+}
+
+/* Acknowledge: the press is felt immediately. */
+.refresh:active {
+  transform: scale(0.96);
+}
+
+/* Status: something is happening. */
+.refresh[data-state="loading"] {
+  cursor: progress;
+}
+
+.refresh[data-state="loading"] .refresh__icon {
+  animation: spin 700ms linear infinite;
+}
+
+/* Outcome: it worked. The icon becomes a check that pops in. */
+.refresh[data-state="success"] {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.refresh[data-state="success"] .refresh__icon {
+  width: 7px;
+  height: 12px;
+  border-width: 0 2px 2px 0;
+  border-color: currentColor;
+  border-radius: 0;
+  rotate: 45deg;
+  animation: pop 300ms ease-out;
+}
+
+/* Outcome: it failed. */
+.refresh[data-state="error"] {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.refresh[data-state="error"] .refresh__icon {
+  border-color: currentColor;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pop {
+  0% { scale: 0.4; }
+  60% { scale: 1.25; }
+  100% { scale: 1; }
+}
+
+/* ---------- Respect people who don't want motion ---------- */
+/* The feedback is still there (color, text) – just without movement. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

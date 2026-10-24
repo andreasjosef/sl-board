@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l1-5-done`** (samma som `l2-0-start`)****. Kolla med `git branch --show-current`.
+Du är på branchen **`l2-1-button`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -225,14 +225,24 @@ export function nextPerLine(rows) {
 
 > Pass 2 börjar på `l2-0-start`, som är exakt samma kod som den här branchen.
 
+### Pass 2, steg 1 – Uppdatera-knappen har fyra lägen · `l2-1-button`
+
+**Vad vi gör:** `setRefreshState(refreshState)` i `src/main.js` sätter `data-state` på knappen, byter texten och stänger av knappen medan den laddar. `load()` anropar den: `loading` först, sedan `success` eller `error`. I `styles.css` (avsnittet "Lesson 2") finns ett utseende per läge: knappen trycks ihop på `:active`, ikonen snurrar vid `loading`, en bock poppar in vid `success`, och knappen blir röd vid `error`.
+
+**Varför:**
+- **Läget bor i JavaScript, CSS ritar det.** JS säger *vad som är sant* (`data-state="loading"`), CSS säger *hur det ser ut*. Då blandas de två inte ihop.
+- `success` och `error` är ögonblick, inte ställen att stanna på, så knappen går tillbaka till `idle` efter 1,5 s. `clearTimeout` hindrar en gammal timer från att nollställa knappen mitt i en ny hämtning.
+- `disabled` under `loading` gör att ett dubbelklick inte startar två hämtningar.
+- `@media (prefers-reduced-motion: reduce)` längst ner i `styles.css`: den som har bett om mindre rörelse i sitt system får färg och text, men ingen rörelse.
+
+**Prova:**
+- `?latency=1500` – ett långsamt nät, så du hinner se snurran.
+- `?source=broken` – hämtningen misslyckas och knappen blir röd.
+
 ### Nästa steg
 
-**Pass 2, steg 1 – Uppdatera-knappen.** Tryck på Uppdatera. Hände något? Tavlan är *frusen*: knappen säger ingenting. Bra feedback svarar på tre frågor:
+**Pass 2, steg 2 – Vad är nytt?** När tavlan uppdateras ser alla rader likadana ut, så man ser inte vad som har kommit till.
 
-1. **Hörde du mig?** Knappen reagerar direkt när du trycker.
-2. **Jobbar du?** Något syns medan datan hämtas.
-3. **Hur gick det?** Klart eller fel, så att man ser det.
+Vi låter *bara nya rader* vända in, som på en gammal fälltavla. För att veta vad som är nytt jämför vi med raderna från förra hämtningen: finns det redan en rad med samma `id`?
 
-Vi ger knappen fyra lägen i `data-state`: `idle`, `loading`, `success` och `error`. JavaScript sätter läget, och CSS bestämmer hur varje läge ser ut.
-
-Klar eller fast? `git switch l2-1-button`
+Klar eller fast? `git switch l2-2-rows`

@@ -8,14 +8,18 @@ import {
   nextPerLine,
 } from "./departures.js";
 import { renderMeta, renderRows, renderSummary, renderDeviations } from "./render.js";
+import { wait } from "./feedback.js";
 
 // Which data to show: ?source=live | snapshot | broken
+// Pretend the network is slow: ?latency=1500 (milliseconds)
 const params = new URLSearchParams(location.search);
 const source = params.get("source") || "snapshot";
+const latency = Number(params.get("latency") || 0);
 
 const el = {
   meta: document.querySelector("#meta"),
   refresh: document.querySelector("#refresh"),
+  refreshLabel: document.querySelector(".refresh__label"),
   filters: document.querySelector("#filters"),
   summary: document.querySelector("#summary"),
   rows: document.querySelector("#rows"),
@@ -27,6 +31,30 @@ const el = {
 const state = {
   rows: [],
 };
+
+// ---------- Lesson 2, step 1 – the refresh button has four states ----------
+
+const REFRESH_LABEL = {
+  idle: "Uppdatera",
+  loading: "Hämtar…",
+  success: "Uppdaterad",
+  error: "Försök igen",
+};
+
+let resetTimer;
+
+function setRefreshState(refreshState) {
+  el.refresh.dataset.state = refreshState;
+  el.refreshLabel.textContent = REFRESH_LABEL[refreshState];
+  el.refresh.disabled = refreshState === "loading";
+
+  // Success and error are moments, not places to stay: back to idle after 1.5 s.
+  // clearTimeout stops an older timer from resetting the button in the middle of a new fetch.
+  clearTimeout(resetTimer);
+  if (refreshState === "success" || refreshState === "error") {
+    resetTimer = setTimeout(() => setRefreshState("idle"), 1500);
+  }
+}
 
 function readFilters() {
   return {
@@ -50,7 +78,10 @@ function render() {
 }
 
 async function load() {
+  setRefreshState("loading");
+
   try {
+    await wait(latency);
     const board = await fetchBoard(source);
     window.board = board;
 
@@ -59,8 +90,10 @@ async function load() {
     renderMeta(el.meta, board.now, source);
     renderDeviations(el.deviations, board.deviations);
     render();
+    setRefreshState("success");
   } catch (error) {
     el.status.textContent = `Kunde inte hämta avgångar: ${error.message}`;
+    setRefreshState("error");
   }
 }
 
