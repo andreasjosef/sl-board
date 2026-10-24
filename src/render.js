@@ -120,14 +120,22 @@ export function renderSummary(el, summary) {
     </div>`;
 }
 
-function deviationToHtml(deviation) {
+// Lesson 2, step 4: like the rows, only new disruptions get data-new and slide in.
+// newDeviations holds the same objects as deviations, so includes can find them.
+function deviationToHtml(deviation, newDeviations) {
   let className = "deviation";
   if (deviation.importance_level >= 7) {
     className = "deviation deviation--high";
   }
-  return `<p class="${className}">${escapeHtml(deviation.message)}</p>`;
+
+  let change = "";
+  if (newDeviations.includes(deviation)) {
+    change = "data-new";
+  }
+
+  return `<p class="${className}" ${change}>${escapeHtml(deviation.message)}</p>`;
 }
 
-export function renderDeviations(el, deviations) {
-  el.innerHTML = deviations.map(deviationToHtml).join("");
+export function renderDeviations(el, deviations, newDeviations) {
+  el.innerHTML = deviations.map((deviation) => deviationToHtml(deviation, newDeviations)).join("");
 }

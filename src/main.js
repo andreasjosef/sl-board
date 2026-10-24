@@ -8,7 +8,7 @@ import {
   nextPerLine,
 } from "./departures.js";
 import { renderMeta, renderRows, renderSummary, renderDeviations } from "./render.js";
-import { wait } from "./feedback.js";
+import { wait, announce } from "./feedback.js";
 
 // Which data to show: ?source=live | snapshot | broken
 // Pretend the network is slow: ?latency=1500 (milliseconds)
@@ -25,11 +25,13 @@ const el = {
   rows: document.querySelector("#rows"),
   deviations: document.querySelector("#deviations"),
   status: document.querySelector("#status"),
+  announcer: document.querySelector("#announcer"),
 };
 
 // Everything the board knows right now.
 const state = {
   rows: [],
+  deviations: [],
 };
 
 // ---------- Lesson 2, step 1 – the refresh button has four states ----------
@@ -78,6 +80,22 @@ function render(oldRows) {
   el.status.textContent = `Visar ${visible.length} av ${state.rows.length} avgångar.`;
 }
 
+// ---------- Lesson 2, step 4 – disruptions slide in and are read out ----------
+
+function showDeviations(deviations) {
+  // Which disruptions weren't there at the last fetch?
+  const newDeviations = deviations.filter(
+    (deviation) => !state.deviations.some((old) => old.id === deviation.id),
+  );
+  state.deviations = deviations;
+
+  renderDeviations(el.deviations, deviations, newDeviations);
+  if (newDeviations.length > 0) {
+    const messages = newDeviations.map((deviation) => deviation.message);
+    announce(el.announcer, `Störning: ${messages.join(" ")}`);
+  }
+}
+
 async function load() {
   setRefreshState("loading");
 
@@ -90,7 +108,7 @@ async function load() {
     state.rows = board.departures.map((departure) => toRow(departure, board.now));
 
     renderMeta(el.meta, board.now, source);
-    renderDeviations(el.deviations, board.deviations);
+    showDeviations(board.deviations);
     render(oldRows);
     setRefreshState("success");
   } catch (error) {

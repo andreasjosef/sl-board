@@ -107,7 +107,7 @@ Datan som följer med är **exempeldata** i samma format som SL:s API, så att a
 
 ## Steg för steg
 
-Du är på branchen **`l2-3-status`**. Kolla med `git branch --show-current`.
+Du är på branchen **`l2-4-deviations`**. Kolla med `git branch --show-current`.
 
 ### Pass 1, steg 0 – Titta på datan först · `l1-0-start`
 
@@ -272,10 +272,30 @@ Alla tre körs bara på `[data-new]` eller `[data-changed]`, och de väntar till
 
 **Prova:** Ladda om sidan och titta på raderna som är "Nu", försenade eller inställda. Ändra `3` till `infinite` i `pulse`-regeln och se hur störande det blir.
 
+### Pass 2, steg 4 – Störningar glider in och läses upp · `l2-4-deviations`
+
+**Vad vi gör:** `showDeviations(deviations)` i `src/main.js` tar fram de nya störningarna med `filter` och `some`:
+
+```js
+const newDeviations = deviations.filter(
+  (deviation) => !state.deviations.some((old) => old.id === deviation.id),
+);
+```
+
+Nya störningar får `data-new` och glider in (`slide-in` i `styles.css`). Deras text skickas till `announce()` i `src/feedback.js`, som skriver den i en dold `<p id="announcer" aria-live="polite">` i `index.html`. Skärmläsare läser upp text som dyker upp i ett `aria-live`-element.
+
+**Varför:**
+- **Feedback som bara syns når inte alla.** Animationen är för ögonen, `aria-live` är för öronen.
+- Bara *nya* störningar läses upp. `aria-live` har flyttats från hela störningsrutan till announcern, annars skulle allt läsas upp igen vid varje uppdatering.
+- `announce` tömmer elementet först och fyller det 100 ms senare. Då läses samma meddelande upp även om det kommer två gånger.
+- `.visually-hidden` döljer text för ögonen men inte för skärmläsare. `display: none` skulle dölja den för båda.
+
+**Prova:** Ladda om sidan, så glider störningarna in. Starta en skärmläsare (VoiceOver: Cmd+F5, Windows: Narrator med Ctrl+Win+Enter) och lyssna.
+
 ### Nästa steg
 
-**Pass 2, steg 4 – Inte bara för ögonen.** En störning dyker upp på tavlan. Den som använder skärmläsare märker ingenting.
+**Pass 2, steg 5 – Ärligt fel.** Vad händer när nätet går ner? Just nu blir knappen röd en stund, och sedan ser den gamla tavlan ut som om allt är som vanligt.
 
-Nya störningar ska glida in, och de ska *läsas upp* med `aria-live`. Precis som med raderna tar vi reda på vilka störningar som är nya genom att jämföra `id` med förra hämtningen.
+Ett ärligt fel gör tre saker: säger *nej* (knappen skakar), visar *att datan är gammal* (tavlan blir grå) och berättar *vad som hände och hur gammal datan är* ("Visar avgångar från 08:00").
 
-Klar eller fast? `git switch l2-4-deviations`
+Klar eller fast? `git switch l2-5-error`

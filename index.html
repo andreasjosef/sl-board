@@ -37,7 +37,7 @@
 
       <section class="summary" id="summary" aria-label="Sammanfattning"></section>
 
-      <section class="deviations" id="deviations" aria-label="Störningar" aria-live="polite"></section>
+      <section class="deviations" id="deviations" aria-label="Störningar"></section>
 
       <div class="departures">
         <div class="row row--head" aria-hidden="true">
@@ -50,6 +50,9 @@
       </div>
 
       <p class="status-line" id="status" role="status" aria-live="polite"></p>
+
+      <!-- Lesson 2: read out by screen readers, never shown on screen -->
+      <p class="visually-hidden" id="announcer" aria-live="polite"></p>
     </main>
 
     <script type="module" src="src/main.js"></script>
